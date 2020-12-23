@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>准备保存的信息</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='layui/css/layui.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main/css/main.css') }}">
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<body style="background-color: lightgrey;">
+    <!-- header -->
+    <ul class="layui-nav" lay-filter="">
+      <li class="layui-nav-item layui-this"><a href="/token/{{ user_data.user_name }}/{{ user_data.pass_word }}">首页</a></li>
+      <li class="layui-nav-item"><a href="/get_my_data/{{ user_data.user_name }}/{{ user_data.pass_word }}">我的数据</a></li>
+    </ul>
+    <div style="margin-top: 20px"></div>
+    <blockquote class="layui-elem-quote" style="font-size: 20px; color: red; font-weight: bold;">
+      {{ declared_data.data }}
+    </blockquote>
+    <div style="margin-top: 20px"></div>
+    <!-- form box -->
+    <div class="form_box">
+      <div>
+        <!-- 提交的form表单在这里 -->
+        <form class="layui-form" action="/save_data/{{ user_data.user_name }}/{{ user_data.pass_word}}" method="post">
+          <!-- 
+          item['decription'] = str(each['decription'])
+          item['propertyname'] = str(each['propertyname'])
+          item['value'] = str(each['value'])
+          item['checkValues'] = str(each['checkValues'])
+          -->
+          {% for item in data_list %}
+            <!-- {{ item.propertyname }} -->
+            <div class="layui-card" style="margin-top: 10px; width: 100%">
+              <div class="layui-card-header">
+                <blockquote class="layui-elem-quote">
+                  {{ item.decription }}
+                </blockquote>
+              </div>
+              <div class="layui-card-body">
+                <div class="layui-form-item">
+                  <!--
+                  <label class="layui-form-label">{{ item.decription }}</label>
+                  -->
+                  <div class="layui-input-block">
+                    {% if item.checkValues != None %}
+                    <!-- lay-verify="required" -->
+                    <select name="{{ item.propertyname }}" >
+                      {% if item.value == None %}
+                        <option value="">请选择一个值</option>
+                      {% endif %}
+                      {% for each_option in item.checkValues %}
+                        {% if item.value == each_option.text %}
+                          <option value="{{ each_option.text }}" selected >{{ each_option.text }}</option>
+                          {% else %} 
+                          <option value="{{ each_option.text }}">{{ each_option.text }}</option>
+                        {% endif %}
+                      {% endfor %}
+                    </select>
+                    {% else %}
+                      <div class="layui-input-block">
+                        {% if item.value == None %}
+                        <!-- lay-verify="required" required -->
+                          <input 
+                              type="text" 
+                              name="{{ item.propertyname }}" 
+                              placeholder="要填写内容"
+                              autocomplete="off" class="layui-input">
+                        {% else %}
+                          <input
+                            type="text" 
+                            name="{{ item.propertyname }}" 
+                            value="{{ item.value }}" 
+                            autocomplete="off" class="layui-input">
+                        {% endif %}
+                      </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+          {% endfor %}
+          
+
+          
+          <blockquote class="layui-elem-quote">
+            下面获取的数据 不需要修改 如果要修改请去打一次卡 就会改变
+          </blockquote>
+          <!--     
+          user_data['areaStr'] = data['areaStr']
+          # customerid => XXXX
+          user_data['customerid'] = data['customerid']
+          # deptStr => {'deptid': XXXX, 'text': 'XXXX'}
+          user_data['deptStr'] = data['deptStr']
+          # phonenum => XXXX
+          user_data['phonenum'] = data['phonenum']
+          # stuNo => XXXX
+          user_data['stuNo'] = data['stuNo']
+          # userid => XXXX
+          user_data['userid'] = data['userid']
+          # username => XXX
+          user_data['username'] = data['username'] 
+          -->
+          <!-- 这个是切分数据的 以上为获得数据 下面为固定数据不需要修改 -->
+          <input 
+                value="---"
+                type="text" 
+                name="XXXXXXXXX"
+                style="display: none;"
+                readonly="readonly"
+                lay-verify="required"  
+                autocomplete="off" 
+                class="layui-input">
+          <!-- token -->
+          <input 
+                value="{{ user_data.token }}"
+                type="text" 
+                name="token"
+                style="display: none;"
+                readonly="readonly"
+                lay-verify="required"  
+                autocomplete="off" 
+                class="layui-input">
+          <div class="layui-card" style="margin-top: 10px; width: 100%">
+            <div class="layui-card-header">
+              <blockquote class="layui-elem-quote">
+                打卡位置(取你上一次打卡的位置)
+              </blockquote>
+            </div>
+            <div class="layui-card-body">
+              <input 
+                value="{{ user_data.areaStr }}"
+                type="text" 
+                name="areaStr"
+                readonly="readonly"
+                lay-verify="required"  
+                autocomplete="off" 
+                class="layui-input">
+            </div>
+          </div>
+          
+          <div class="layui-card" style="margin-top: 10px; width: 100%">
+            <div class="layui-card-header">
+              <blockquote class="layui-elem-quote">
+                customerid
+              </blockquote>
+            </div>
+            <div class="layui-card-body">
+              <input 
+                value="{{ user_data.customerid }}"
+                type="text" 
+                name="customerid"
+                readonly="readonly"
+                lay-verify="required" 
+                autocomplete="off" 
+                class="layui-input">
+            </div>
+          </div>
+          
+          <div class="layui-card" style="margin-top: 10px; width: 100%">
+            <div class="layui-card-header">
+              <blockquote class="layui-elem-quote">
+                deptStr
+              </blockquote>
+            </div>
+            <div class="layui-card-body">
+              <input 
+                value="{{ user_data.deptStr }}"
+                type="text" 
+                name="deptStr"
+                readonly="readonly"
+                lay-verify="required" 
+                autocomplete="off" 
+                class="layui-input">
+            </div>
+          </div>
+          
+          <div class="layui-card" style="margin-top: 10px; width: 100%">
+            <div class="layui-card-header">
+              <blockquote class="layui-elem-quote">
+                phonenum
+              </blockquote>
+            </div>
+            <div class="layui-card-body">
+              <input
+                value="{{ user_data.phonenum }}"
+                type="text" 
+                name="phonenum"
+                readonly="readonly"
+                lay-verify="required" 
+                autocomplete="off" 
+                class="layui-input">
+            </div>
+          </div>
+          
+          <div class="layui-card" style="margin-top: 10px; width: 100%">
+            <div class="layui-card-header">
+              <blockquote class="layui-elem-quote">
+                stuNo
+              </blockquote>
+            </div>
+            <div class="layui-card-body">
+              <input
+                value="{{ user_data.stuNo }}"
+                type="text" 
+                name="stuNo"
+                readonly="readonly"
+                lay-verify="required" 
+                autocomplete="off" 
+                class="layui-input">
+            </div>
+          </div>
+          
+          <div class="layui-card" style="margin-top: 10px; width: 100%">
+            <div class="layui-card-header">
+              <blockquote class="layui-elem-quote">
+                userid
+              </blockquote>
+            </div>
+            <div class="layui-card-body">
+              <input
+                value="{{ user_data.userid }}"
+                type="text" 
+                name="userid"
+                readonly="readonly"
+                lay-verify="required" 
+                autocomplete="off" 
+                class="layui-input">
+            </div>
+          </div>
+          
+          <div class="layui-card" style="margin-top: 10px; width: 100%">
+            <div class="layui-card-header">
+              <blockquote class="layui-elem-quote">
+                username
+              </blockquote>
+            </div>
+            <div class="layui-card-body">
+              <input
+                value="{{ user_data.username }}"
+                type="text" 
+                name="username"
+                readonly="readonly"
+                lay-verify="required" 
+                autocomplete="off" 
+                class="layui-input">
+            </div>
+          </div>
+
+          <div class="layui-form-item">
+            <div class="layui-input-block">
+              <button class="layui-btn" lay-submit lay-filter="formDemo">更新数据</button>
+              <button type="button" id="getReload" class="layui-btn layui-btn-primary">刷新</button>
+            </div>
+          </div>
+        </form>
+      </div>
+  </div>
+
+    <script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+    <script>
+        //Demo
+        layui.use('element', function(){
+          var element = layui.element;
+
+        });
+        layui.use('form', function(){
+          var form = layui.form;
+          //监听提交
+          form.on('submit(formDemo)', function(data){
+            layer.msg(JSON.stringify(data.field));
+            console.log(JSON.stringify(data.field));
+            return true;
+          });
+        });
+        
+        $("#getReload").click(function () {
+          window.location.reload();
+        });
+    </script>
+</body>
+</html>

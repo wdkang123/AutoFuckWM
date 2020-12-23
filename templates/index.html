@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>先登录再说打卡的事情</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='layui/css/layui.css') }}">
+    <link rel="stylesheet" href="{{ url_for('static', filename='main/css/main.css') }}">
+    <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
+</head>
+<body style="background-color: lightgrey;">
+    <!-- header -->
+    <ul class="layui-nav" lay-filter="">
+      <li class="layui-nav-item layui-this"><a href="">首页</a></li>
+      <li class="layui-nav-item"><a href="">我的数据</a></li>
+    </ul>
+    <blockquote class="layui-elem-quote">
+      解放双手吧 hhh~ 自动打卡在凌晨开始
+    </blockquote>
+    <div class="layui-container">  
+      <div class="layui-row">
+        <div class="layui-col-md1" style="background-color: lightgrey; color: lightgrey;">
+          XXX
+        </div>
+        <div class="layui-col-md10">
+          <form class="layui-form" action="/没啥防护手下留情" method="post" style="margin-top: 30px" >
+            <div class="layui-form-item">
+              <label class="layui-form-label">这里是账号</label>
+              <div class="layui-input-block">
+                <input type="text" name="username" required  lay-verify="required" placeholder="请输入完美校园账号" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+      
+            <div class="layui-form-item">
+              <label class="layui-form-label">这里是密码</label>
+              <div class="layui-input-inline">
+                <input type="password" name="password" required lay-verify="required" placeholder="请输入完美校园密码" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+      
+            <div class="layui-form-item">
+              <div class="layui-input-block">
+                <button class="layui-btn" lay-submit lay-filter="formDemo">登录</button>
+                <button type="reset" class="layui-btn layui-btn-primary">重置</button>
+              </div>
+            </div>
+          </form>
+        </div>
+        <div class="layui-col-md1" style="background-color: lightgrey; color: lightgrey;">
+          XXX
+        </div>
+      </div>
+    </div>
+    
+    
+    <script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
+    <script>
+        //Demo
+        layui.use('element', function(){
+          var element = layui.element;
+
+        });
+        layui.use('form', function(){
+          var form = layui.form;
+          
+          //监听提交
+          form.on('submit(formDemo)', function(data){
+            layer.msg(JSON.stringify(data.field));
+            let username = data.field.username;
+            let password = data.field.password;
+            window.location = "/token/" + username + "/" + password;
+            return false;
+          });
+        });
+    </script>
+</body>
+</html>
