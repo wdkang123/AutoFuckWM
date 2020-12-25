@@ -8,11 +8,11 @@ import time
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
 
-
+# 你flask启动的服务
 server_ip = ""
 server_port = ""
 
-# pushplus
+# pushplus的token
 pp_token = ""
 
 # database
@@ -30,6 +30,7 @@ def reset_status():
 
 # 打卡函数
 def fuck_check():
+    dao.connect(dao_url, dao_username, dao_password)
     sql = "select id, username, password, status from auto_check where status=0;"
     rows = dao.execute_sql(sql)
     for row in rows:
@@ -45,7 +46,7 @@ def fuck_check():
         if str(resp) == "打卡成功":
             sql = "update auto_check set status='1' where id='" + str(user_id) + "';"
             dao.execute_sql(sql)
-            # print(str(username) + "打卡成功")
+            print(str(username) + "打卡成功")
         else:
             sql = "update auto_check set status='3' where id='" + str(user_id) + "';"
             dao.execute_sql(sql)
@@ -55,35 +56,19 @@ def fuck_check():
 
 # 发送打卡报告
 def send_status():
-    sql = "select username, status from auto_check ORDER BY username;"
     dao.connect(dao_url, dao_username, dao_password)
+    sql = "select username, status from auto_check ORDER BY username;"
     rows = dao.execute_sql(sql)
     dao.close()
-    html_string = """<table cellpadding="0" cellspacing="0" style="line-height:25px;">
-        <tr>
-            <th style="border:1px solid #aaa">账号</th>
-            <th style="border:1px solid #aaa">名字</th>
-            <th style="border:1px solid #aaa">打卡状态</th>
-        </tr>"""
+    html_string = ''
     for row in rows:
         username = row[0]
-        status = rows[1]
-        if str(status) == "1":
-            html_string = str(html_string) + f"""
-            <tr>
-                <td style="text-align:center;border:1px solid #aaa">{username}</td>
-                <td style="text-align:center;border:1px solid #aaa">打卡成功</td>
-            </tr>
-            """
+        status = row[1]
+        if status == "1":
+            html_string = str(html_string) + str(username) + ' : 打卡成功' + "<br />"
         else:
-            html_string = str(html_string) + f"""
-            <tr>
-                <td style="text-align:center;border:1px solid #aaa">{username}</td>
-                <td style="text-align:center;border:1px solid #aaa">打卡失败</td>
-            </tr>
-            """
-    html_string = str(html_string) + "</table>"
-    server_msg = "http://pushplus.hxtrip.com/send?token=" + str(pp_token) + "&title=打卡成功统计表&content=" + str(html_string) + "&template=html&topic=user"
+            html_string = str(html_string) + str(username) + ' : 打卡失败' + "<br />"
+    server_msg = "http://pushplus.hxtrip.com/send?token=" + str(pp_token) + "&title=打卡统计表&content=" + str(html_string) + "&template=html&topic=user"
     requests.get(url=server_msg)
 
 
@@ -95,7 +80,7 @@ scheduler = BlockingScheduler()
 # cron: 在特定时间周期性地触发
 
 # 21点15分重置等待打卡
-scheduler.add_job(reset_status, 'cron', day_of_week='1-7', hour=21, minute=15)
-scheduler.add_job(fuck_check, 'cron', day_of_week='1-7', hour=5, minute=30)
-scheduler.add_job(send_status, 'cron', day_of_week='1-7', hour=8, minute=00)
+scheduler.add_job(reset_status, 'cron', day_of_week='0-6', hour=21, minute=15)
+scheduler.add_job(fuck_check, 'cron', day_of_week='0-6', hour=5, minute=30)
+scheduler.add_job(send_status, 'cron', day_of_week='0-6', hour=8, minute=15)
 scheduler.start()
