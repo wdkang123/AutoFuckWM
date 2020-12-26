@@ -8,18 +8,27 @@ import time
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
 
+# config
+import configparser
+
+
+# config
+cfg = configparser.ConfigParser()
+cfg.read("config.ini")
+
 # 你flask启动的服务
-server_ip = ""
-server_port = ""
+server_ip = str(cfg.get("server", "SERVER_IP"))
+server_port = str(cfg.get("server", "SERVER_PORT"))
 
 # pushplus的token
-pp_token = ""
+pp_token = str(cfg.get("server", "PUSHPLUAH_TOKEN"))
 
 # database
 dao = DataDao()
-dao_url = ""
-dao_username = ""
-dao_password = ""
+dao_url = str(cfg.get("mysql", "HOST"))
+dao_username = str(cfg.get("mysql", "USERNAME"))
+dao_password = str(cfg.get("mysql", "PASSWORD"))
+
 
 # 重置状态
 def reset_status():
@@ -83,4 +92,5 @@ scheduler = BlockingScheduler()
 scheduler.add_job(reset_status, 'cron', day_of_week='0-6', hour=21, minute=15)
 scheduler.add_job(fuck_check, 'cron', day_of_week='0-6', hour=5, minute=30)
 scheduler.add_job(send_status, 'cron', day_of_week='0-6', hour=8, minute=15)
+print("========== 启动成功 ===========")
 scheduler.start()

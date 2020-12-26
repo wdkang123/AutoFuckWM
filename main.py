@@ -4,6 +4,7 @@ from flask import redirect
 from flask import request
 from flask import make_response
 
+
 import requests
 import json
 import re
@@ -15,15 +16,20 @@ import base64
 from MySqlConn import DataDao
 from auto_token.campus import CampusCard
 
+import configparser
 
-# database
-dao = DataDao()
-dao_url = ""
-dao_username = ""
-dao_password = ""
+# config
+cfg = configparser.ConfigParser()
+cfg.read("config.ini")
 
 # flask
 app = Flask(__name__)
+
+# database
+dao = DataDao()
+dao_url = str(cfg.get("mysql", "HOST"))
+dao_username = str(cfg.get("mysql", "USERNAME"))
+dao_password = str(cfg.get("mysql", "PASSWORD"))
 
 
 @app.route('/index')
