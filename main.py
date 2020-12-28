@@ -299,7 +299,7 @@ def fuck_all():
         item = {}
         item['id'] = row[0]
         item['username'] = row[1]
-        item['password'] = row[2]
+        item['password'] = "***"
         item['status'] = row[4]
         data = base64.b64decode(row[3]).decode("utf-8")
         data = json.loads(data)

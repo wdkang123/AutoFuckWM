@@ -71,12 +71,13 @@ def send_status():
     dao.close()
     html_string = ''
     for row in rows:
-        username = row[0]
-        status = row[1]
+        username = str(row[0])
+        status = str(row[1])
+        username = str(username[0:2]) + "*" + str(username[7:11])
         if status == "1":
-            html_string = str(html_string) + str(username) + ' : 打卡成功' + "<br />"
+            html_string = str(html_string) + str(username) + ' : 成功' + "<br>"
         else:
-            html_string = str(html_string) + str(username) + ' : 打卡失败' + "<br />"
+            html_string = str(html_string) + str(username) + ' : 失败' + "<br>"
     server_msg = "http://pushplus.hxtrip.com/send?token=" + str(pp_token) + "&title=打卡统计表&content=" + str(html_string) + "&template=html&topic=user"
     requests.get(url=server_msg)
 
