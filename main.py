@@ -233,7 +233,7 @@ def save_data(username=None, password=None):
         # 说明用户之前没有数据
         # 现在是新增
         if str(rows) == "()":
-            print("----------------------------")
+            # print("----------------------------")
             sql = "insert into auto_check values(0,'" + str(username) + "', '" + str(password) + "', '" + str(save_data) + "', " + "'0'"  + ");"
         # 否则是更新数据
         else:
@@ -299,6 +299,7 @@ def fuck_all():
         item = {}
         item['id'] = row[0]
         item['username'] = row[1]
+        # 新增密码注释掉 为了安全
         item['password'] = "***"
         item['status'] = row[4]
         data = base64.b64decode(row[3]).decode("utf-8")

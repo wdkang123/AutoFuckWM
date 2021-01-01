@@ -4,7 +4,6 @@ import re
 import requests
 from MySqlConn import DataDao
 import time
-
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
 
