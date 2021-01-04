@@ -39,6 +39,8 @@ def reset_status():
 # 打卡函数
 def fuck_check():
     dao.connect(dao_url, dao_username, dao_password)
+    # 0-开启打卡 | 1-已经打卡 | 2-关闭打卡 | 3-打卡异常 (3时为不打卡)
+    # 查询出所有状态为0的用户
     sql = "select id, username, password, status from auto_check where status=0;"
     rows = dao.execute_sql(sql)
     for row in rows:
@@ -49,14 +51,19 @@ def fuck_check():
         url = "http://" + str(server_ip) + ":" + str(server_port) + "/fuck_it/" + str(username) + "/" + str(password)
         response = requests.get(url)
         resp = response.text
-        # 0-开启打卡 | 1-已经打卡 | 2-关闭打卡 | 3-打卡异常 (3时为不打卡)
         # 在首页提交数据后 状态会调整为0
         if str(resp) == "打卡成功":
+            # 打卡成功
             sql = "update auto_check set status='1' where id='" + str(user_id) + "';"
             dao.execute_sql(sql)
-            print(str(username) + "打卡成功")
+            # print(str(username) + "打卡成功")
         else:
+            # 打卡异常
             sql = "update auto_check set status='3' where id='" + str(user_id) + "';"
+            dao.execute_sql(sql)
+            # 将异常信息写入数据库
+            # 这里需要记录一下 有很多次异常了 但是不知道为什么异常了
+            sql = "insert into error_record values(default," + "'" + str(username) + "', '" + str(resp) + "', '" + str(time.strftime("%Y-%m-%d")) + "')"
             dao.execute_sql(sql)
         time.sleep(5)
     dao.close()
