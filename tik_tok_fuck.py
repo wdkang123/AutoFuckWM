@@ -32,6 +32,7 @@ dao_password = str(cfg.get("mysql", "PASSWORD"))
 # 重置状态
 def reset_status():
     dao.connect(dao_url, dao_username, dao_password)
+    # 只操作为0的 因为2为暂停 3为异常 这两个情况都略过
     sql = "update auto_check set status=0 where status=1;"
     dao.execute_sql(sql)
     dao.close()
@@ -81,8 +82,13 @@ def send_status():
         status = str(row[1])
         username = str(username[0:2]) + "*" + str(username[7:11])
         if status == "1":
+            # 成功的
             html_string = str(html_string) + str(username) + ' : 成功' + "<br>"
+        elif status == "2":
+            # 暂停的
+            html_string = str(html_string) + str(username) + ' : 暂停' + "<br>"
         else:
+            # 其他情况都算失败的
             html_string = str(html_string) + str(username) + ' : 失败' + "<br>"
     server_msg = "http://pushplus.hxtrip.com/send?token=" + str(pp_token) + "&title=打卡统计表&content=" + str(html_string) + "&template=html&topic=user"
     requests.get(url=server_msg)
