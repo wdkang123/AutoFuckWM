@@ -8,7 +8,14 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='main/css/main.css') }}">
 </head>
 <body>
-    出现错误: {{ error_string }}
+    <blockquote class="layui-elem-quote" style="font-size: 18px;">
+        出现错误: {{ error_string }}
+    </blockquote>
+    <a href="javascript:history.back(-1)">
+        <button type="button" class="layui-btn layui-btn-primary">
+            返回上一页
+        </button>
+    </a>
 <script>
     
 </script>

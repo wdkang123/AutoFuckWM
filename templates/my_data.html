@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>瞧瞧我自己的数据长啥样</title>
+    <title>我的数据</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='layui/css/layui.css') }}">
     <link rel="stylesheet" href="{{ url_for('static', filename='main/css/main.css') }}">
     <script src="https://cdn.staticfile.org/jquery/1.10.2/jquery.min.js"></script>
@@ -18,16 +18,20 @@
       {{ declared_data.data }}
     </blockquote>
     <div style="margin-top: 20px"></div>
-    <blockquote class="layui-elem-quote">
-        当前的打卡状态: {{ user_data.status }}
-    </blockquote>
-    0-开启打卡 | 1-已经打卡 | 2-关闭打卡 | 3-打卡异常 (3时为不打卡)
+    <div style="font-size: 18px;">
+      0 - 开启打卡(正常打卡)
+      <br>
+      1 - 已经打卡(正常打卡)
+      <br>
+      2 - 关闭打卡(2时不打卡)
+      <br>
+      3 - 打卡异常 (3时不打卡 说明有错误)
+    </div>
     <br />
-    在首页提交数据后 状态会调整为0
+    在更新数据后 状态会调整为0
     <br />
     <button id="open_button" type="button" class="layui-btn layui-btn-primary">开启打卡</button>
     <button id="stop_button" type="button" class="layui-btn layui-btn-danger">关闭打卡</button>
-    <button id="now_button" type="button" class="layui-btn layui-btn-warm">现在就打</button>
     <table class="layui-table">
         <thead>
           <tr>
@@ -46,6 +50,13 @@
           </tr>
         </tbody>
       </table>
+      <!-- -->
+      <div>
+        两次打卡要间隔5分钟以上
+      </div>
+      <button id="now_button" type="button" class="layui-btn layui-btn-warm">
+        现在打卡
+      </button>
 <script>
   $("#open_button").click(function () {
     // /update/<username>/<password>/<status>

@@ -261,12 +261,18 @@ def get_my_data(username=None, password=None):
     rows = dao.execute_sql(sql)
     dao.close()
     # 用户的打卡数据
-    item = {}
-    item['id'] = rows[0][0]
-    item['username'] = rows[0][1]
-    item['password'] = rows[0][2]
-    item['data'] = rows[0][3]
-    item['status'] = rows[0][4]
+    try:
+        # 这里如果用户本身没有保存过数据 那么获取就会为空
+        # 而且会报错
+        item = {}
+        item['id'] = rows[0][0]
+        item['username'] = rows[0][1]
+        item['password'] = rows[0][2]
+        item['data'] = rows[0][3]
+        item['status'] = rows[0][4]
+    except Exception:
+        error_string = "数据库没数据 先点更新数据 就可以查看个人数据了"
+        return render_template('error.html', error_string=error_string)
     return render_template('my_data.html', user_data=item, declared_data=declared_data)
 
 
@@ -297,10 +303,10 @@ def fuck_all():
     data_list = []
     for row in rows:
         item = {}
-        item['id'] = row[0]
+        # item['id'] = row[0]
         item['username'] = row[1]
         # 新增密码注释掉 为了安全
-        item['password'] = "***"
+        # item['password'] = "***"
         item['status'] = row[4]
         data = base64.b64decode(row[3]).decode("utf-8")
         data = json.loads(data)
