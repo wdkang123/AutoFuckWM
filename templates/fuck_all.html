@@ -12,39 +12,56 @@
     <div class="layui-container">  
       <div class="layui-row">
         <div class="layui-col-md1" style="background-color: lightgrey; color: lightgrey;">
-          XXX
+          -
         </div>
         <div class="layui-col-md10">
           <table class="layui-table">
             <colgroup>
-              <col width="150">
-              <col width="200">
+              <col>
+              <col>
               <col>
             </colgroup>
             <thead>
               <tr>
-                <th>id</th>
-                <th>name</th>
-                <th>username</th>
-                <th>password</th>
-                <th>status</th>
+                <th>名字</th>
+                <th>电话</th>
+                <th>今日打卡状态</th>
               </tr> 
             </thead>
             <tbody>
               {% for item in data_list %}
               <tr>
-                <td>{{ item.id }}</td>
                 <td>{{ item.data }}</td>
                 <td>{{ item.username }}</td>
-                <td>{{ item.password }}</td>
-                <td>{{ item.status }}</td>
+                <!-- 这里将status数值转换为文字 -->
+                {% if item.status == '0' %}
+                  <td>
+                    <span class="layui-badge layui-bg-blue">等待打卡</span>
+                  </td>
+                {% elif item.status == '1' %}
+                  <td>
+                    <span class="layui-badge layui-bg-green">打卡成功</span>
+                  </td>
+                {% elif item.status == '2' %}
+                  <td>
+                    <span class="layui-badge layui-bg-gray">暂停打卡</span>
+                  </td>
+                {% elif item.status == '3' %}
+                  <td>
+                    <span class="layui-badge">打卡异常</span>
+                  </td>
+                {% else %}
+                  <td>
+                    <span class="layui-badge">打卡异常</span>
+                  </td>
+                {% endif %}
               </tr>
               {% endfor %}
             </tbody>
           </table>
         </div>
         <div class="layui-col-md1" style="background-color: lightgrey; color: lightgrey;">
-          XXX
+          -
         </div>
       </div>
     </div>
@@ -52,7 +69,6 @@
     
     <script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
     <script>
-        //Demo
         layui.use('element', function(){
           var element = layui.element;
 

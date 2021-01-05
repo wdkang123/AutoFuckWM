@@ -14,9 +14,9 @@
       <li class="layui-nav-item layui-this"><a href="">首页</a></li>
       <li class="layui-nav-item"><a href="">我的数据</a></li>
     </ul>
-    <blockquote class="layui-elem-quote">
-      解放双手吧 hhh~ 自动打卡在凌晨开始
-    </blockquote>
+    <div style="font-size: 16px; color: red; font-weight: bold;">
+      只为按时打卡 身体不适 及时反映情况!
+    </div>
     <div class="layui-container">  
       <div class="layui-row">
         <div class="layui-col-md1" style="background-color: lightgrey; color: lightgrey;">
@@ -51,7 +51,40 @@
         </div>
       </div>
     </div>
-    
+
+    <!-- 这部分是我自己加的 和项目没啥关系 -->
+    <div>
+      项目是开源的:<a href="https://github.com/wdkang123">喜欢就点下star</a>
+    </div>
+    <div>
+      个人博客:<a href="http://wdkang.top">个人博客</a>
+    </div>
+    <div>
+      只是为了让大家方便一下 手下留情 不要搞破坏！
+    </div>
+    <!-- --- -->
+
+    <blockquote class="layui-elem-quote" style="font-size: 18px;">
+      使用的注意事项:
+    </blockquote>
+    <div style="font-size: 18px;">
+      1.下载完美校园APP
+      <br>
+      2.手机号登录(验证码登录)
+      <br>
+      3.修改密码
+      <br>
+      4.拿着你的账号密码来登录(确定绑定了学号)
+      <br>
+      5.<span style="color: red;">登录错误多次后账号会被限制登录一天</span>(所以还是确定账号密码之后再登录)
+      <br>
+      6.登录成功后 填写信息后点 "更新数据" 则会自动开启打卡
+      <br>
+      7.若最近一段时间不需要打卡 请在 "我的数据" 中 点击 "关闭打卡"
+      <br>
+      8.若要位置信息 先在APP上打卡 再来更新数据 就可以获取刚才的位置数据
+      <br>
+    </div>
     
     <script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
     <script>
