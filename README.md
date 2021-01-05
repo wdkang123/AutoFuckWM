@@ -28,6 +28,10 @@
 ![](https://github.com/wdkang123/AutoFuckWM/blob/main/images/img3.png?raw=true)
 <br />
 
+:smiley: 可以看大家的打卡状况（互相帮助）
+<br />
+![](https://github.com/wdkang123/AutoFuckWM/blob/main/images/img4.png?raw=true)
+
 # 目录
 
 # 1.基本环境需求
