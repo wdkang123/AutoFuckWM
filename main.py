@@ -365,21 +365,21 @@ def fuct_it(username=None, password=None):
     dao.connect(dao_url, dao_username, dao_password)
     sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';" 
     rows = dao.execute_sql(sql)
-    data = base64.b64decode(rows[0][3]).decode("utf-8")
-    data = json.loads(data)
-    data['jsonData']['token'] = str(token)
-    data['jsonData']['reportdate'] = int(round(time.time() * 1000))
-    data =json.dumps(data)
-    resp = requests.post(url, data=data, headers=headers)
-    resp = resp.text
-    html = demjson.encode(resp)
-    json_data = demjson.decode(html)
-    json_response = json.loads(json_data)
     try:
+        data = base64.b64decode(rows[0][3]).decode("utf-8")
+        data = json.loads(data)
+        data['jsonData']['token'] = str(token)
+        data['jsonData']['reportdate'] = int(round(time.time() * 1000))
+        data =json.dumps(data)
+        resp = requests.post(url, data=data, headers=headers)
+        resp = resp.text
+        html = demjson.encode(resp)
+        json_data = demjson.decode(html)
+        json_response = json.loads(json_data)
         msg = json_response['msg']
         code = json_response['code']
     except Exception:
-        error_string = "data没了 重新登录看看"
+        error_string = "data不正确 重新登录看看?"
         dao.close()
         return render_template('error.html', error_string=error_string)
     if msg == "成功" and code == "10000":
