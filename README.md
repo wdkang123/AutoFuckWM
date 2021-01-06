@@ -32,6 +32,10 @@
 <br />
 ![](https://github.com/wdkang123/AutoFuckWM/blob/main/images/img4.png?raw=true)
 
+:smiley: 打卡失败的会有打卡失败的日志记录
+<br />
+![](https://github.com/wdkang123/AutoFuckWM/blob/main/images/img5.png?raw=true)
+
 # 目录
 
 # 1.基本环境需求
