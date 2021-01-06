@@ -2,7 +2,7 @@ import json
 import demjson
 import re
 import requests
-from MySqlConn import DataDao
+from model.conn import DataDao
 import time
 from apscheduler.schedulers.blocking import BlockingScheduler
 from datetime import datetime
@@ -71,6 +71,7 @@ def fuck_check():
 
 
 # 发送打卡报告
+# 这块还不太行 看看怎么可以好看一些
 def send_status():
     dao.connect(dao_url, dao_username, dao_password)
     sql = "select username, status from auto_check ORDER BY username;"
