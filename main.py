@@ -13,7 +13,7 @@ import random
 import time
 import base64
 
-from MySqlConn import DataDao
+from model.conn import DataDao
 from auto_token.campus import CampusCard
 
 import configparser
@@ -326,21 +326,23 @@ def fuct_it(username=None, password=None):
     if not password:
         error_string = "参数错误"
         return render_template('error.html', error_string=error_string)
-    '''
-    # 登录完美校园获得token等信息
-        cc = CampusCard(username, password)
-        try:
-            cc.get_main_info()
-        except Exception:
-            error_string = "完美校园账号密码错误"
-            return render_template('error.html', error_string=error_string)
-        token = str(cc.get_token())
-    '''
-    cc = CampusCard(username, password)
+    
+    # 先判断数据是否存在 没有必要先登录
+    dao.connect(dao_url, dao_username, dao_password)    
+    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';" 
+    rows = dao.execute_sql(sql)
     try:
+        data = base64.b64decode(rows[0][3]).decode("utf-8")
+    except Exception:
+        error_string = "要先登录 才能打卡 重新登录看看?"
+        dao.close()
+        return render_template('error.html', error_string=error_string)
+    # 走到这里 说明数据库里有数据 那么就登录 获取最新的token
+    try:
+        cc = CampusCard(username, password)
         cc.get_main_info()
     except Exception:
-        error_string = "获取token出现错误"
+        error_string = "获取token出现错误 可能是账号密码错误 或 网络问题"
         return render_template('error.html', error_string=error_string)
     # 取到了token
     token = str(cc.get_token())
@@ -362,11 +364,7 @@ def fuct_it(username=None, password=None):
                               "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile "
                               "Safari/537.36 Wanxiao/4.6.2",
     }
-    dao.connect(dao_url, dao_username, dao_password)
-    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';" 
-    rows = dao.execute_sql(sql)
     try:
-        data = base64.b64decode(rows[0][3]).decode("utf-8")
         data = json.loads(data)
         data['jsonData']['token'] = str(token)
         data['jsonData']['reportdate'] = int(round(time.time() * 1000))
