@@ -1,7 +1,11 @@
 import requests, random, json, hashlib
-from .campus_card import des_3
-from .campus_card import rsa_encrypt as rsa
+#　from .campus_card import des_3
+# from .campus_card import rsa_encrypt as rsa
 import urllib3
+
+from campus_card import des_3
+from campus_card import rsa_encrypt as rsa
+
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
@@ -24,11 +28,6 @@ class CampusCard:
         if self.user_info['exchangeFlag']:
             self.exchange_secret()
             self.login(phone, password)
-        
-        """
-        with open(user_info[1].format(phone), 'w') as f:
-            f.write(self.save_user_info())
-        """
 
         # token
         self.token_string = "None"
@@ -46,7 +45,7 @@ class CampusCard:
             'exchangeFlag': True,
             'login': False,
             'serverPublicKey': '',
-            'deviceId': str(random.randint(999999999999999, 9999999999999999)),
+            'deviceId': '863064294308244',
             'wanxiaoVersion': 10462101,
             'rsaKey': {
                 'private': rsa_keys[1],
@@ -85,6 +84,8 @@ class CampusCard:
         password_list = []
         for i in password:
             password_list.append(des_3.des_3_encrypt(i, self.user_info["appKey"], "66666666"))
+        # Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Wanxiao/5.3.4
+        # "User-Agent": "NCP/5.3.4 (iPhone; iOS 14.3; Scale/2.00)",
         login_args = {
             "appCode": "M002",
             "deviceId": self.user_info["deviceId"],
@@ -120,38 +121,6 @@ class CampusCard:
         self.token_string = self.user_info["sessionId"]
 
         return resp["result_"]
-
-    def get_bill(self, from_date, end_date):
-        """
-        获取指定日期范围内的校园卡消费记录
-        :param from_date: 查询开始日期
-        :param end_date: 查询结束日期
-        :return: 查询结果
-        """
-        resp = requests.post(
-            "http://server.17wanxiao.com/YKT_Interface/xyk",
-            headers={
-                "Referer": "http://server.17wanxiao.com/YKT_Interface/v2/index.html"
-                           "?utm_source=app"
-                           "&utm_medium=plugin"
-                           "&UAinfo=wanxiao"
-                           "&versioncode={args[wanxiaoVersion]}"
-                           "&customerId=504"
-                           "&systemType=Android"
-                           "&token={args[sessionId]}".format(args=self.user_info),
-                "Origin": "http://server.17wanxiao.com",
-                "User-Agent": "Mozilla/5.0 (Linux; Android 5.1.1; HUAWEI MLA-AL10 Build/HUAWEIMLA-AL10; wv) "
-                              "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile "
-                              "Safari/537.36 Wanxiao/4.6.2",
-            },
-            data={
-                "token": self.user_info["sessionId"],
-                "method": "XYK_TRADE_DETAIL",
-                "param": '{"beginDate":"' + from_date + '","endDate":"' + end_date + '","beginIndex":0,"count":20}'
-            },
-            verify=False
-        ).json()
-        return json.loads(resp["body"])
 
     def get_main_info(self):
         resp = requests.post(

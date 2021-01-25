@@ -50,13 +50,18 @@
           </tr>
         </tbody>
       </table>
-      <!-- -->
+      <!--
       <div>
         两次打卡要间隔5分钟以上
       </div>
       <button id="now_button" type="button" class="layui-btn layui-btn-warm">
         现在打卡
       </button>
+      -->
+      <div style="color: red; font-weight: bold; font-size: 20px;">
+        扫描二维码可以每天8:15接到打卡报告:
+	<img style="width: 100%; height: auto;" src="{{ url_for('static', filename='showqrcode.png') }}" />
+      </div>
 <script>
   $("#open_button").click(function () {
     // /update/<username>/<password>/<status>

@@ -32,6 +32,9 @@ dao_username = str(cfg.get("mysql", "USERNAME"))
 dao_password = str(cfg.get("mysql", "PASSWORD"))
 
 
+# 定义一个可以用来打卡的全局token
+active_token_string = ""
+
 @app.route('/index')
 def index():
     user_data = []
@@ -104,6 +107,11 @@ def getData(token=None, username=None, password=None):
     dao.connect(dao_url, dao_username, dao_password)
     sql = "select * from declared"
     rows = dao.execute_sql(sql)
+
+    # 这里更新下账号密码 防止用户修改密码后 导致完美和mysql不一致
+    user_sql = "update auto_check set password='" + str(password) + "' where username='" + str(username) + "';"
+    dao.execute_sql(user_sql)
+
     dao.close()
     declared_data['data'] = rows[0][1]
     # 提交数据 需要的部分
@@ -164,6 +172,12 @@ def active_token(token=None):
     resp = resp.text
     resp = json.loads(resp)
     resp = resp['msg']
+    
+    # 这里把激活的token拿出来
+    # 这个token将被一直使用
+    global active_token_string
+    active_token_string = token
+
     return str(resp)
 
 # 保存数据
@@ -304,7 +318,8 @@ def fuck_all():
     for row in rows:
         item = {}
         # item['id'] = row[0]
-        item['username'] = row[1]
+        username = str(row[1])
+        item['username'] = str(username[0:3]) + "****" + str(username[7:11])
         # 新增密码注释掉 为了安全
         # item['password'] = "***"
         item['status'] = row[4]
@@ -338,11 +353,12 @@ def fuct_it(username=None, password=None):
         dao.close()
         return render_template('error.html', error_string=error_string)
     # 走到这里 说明数据库里有数据 那么就登录 获取最新的token
+    '''
     try:
         cc = CampusCard(username, password)
         cc.get_main_info()
     except Exception:
-        error_string = "获取token出现错误 可能是账号密码错误 或 网络问题"
+        error_string = "CampusCard()获取token出现错误 可能是账号密码错误 或 网络问题"
         return render_template('error.html', error_string=error_string)
     # 取到了token
     token = str(cc.get_token())
@@ -351,6 +367,12 @@ def fuct_it(username=None, password=None):
     if msg != "成功":
         error_string = "token激活失败"
         return render_template('error.html', error_string=error_string)
+    '''
+    
+    # 2021 / 1 / 23 token只获取一次
+    global active_token_string
+    token = active_token_string
+
     # 这里已经激活token
     # 提交数据
     url = 'https://reportedh5.17wanxiao.com/sass/api/epmpics'
@@ -364,6 +386,8 @@ def fuct_it(username=None, password=None):
                               "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile "
                               "Safari/537.36 Wanxiao/4.6.2",
     }
+    if token == "":
+        return "token 没激活"
     try:
         data = json.loads(data)
         data['jsonData']['token'] = str(token)
