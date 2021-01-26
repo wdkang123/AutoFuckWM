@@ -5,7 +5,6 @@ import urllib3
 
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 
-
 class CampusCard:
     """
     完美校园APP
@@ -13,28 +12,26 @@ class CampusCard:
     """
     data = None
 
-    def __init__(self, phone, password, user_info=(None, '{}.info')):
+    def __init__(self, phone, password, deviceId):
         """
         初始化一卡通类
         :param phone: 完美校园账号
         :param password: 完美校园密码
-        :param user_info: 已登录的虚拟设备
+        :param deviceId: 设备的ID号
         """
-        self.user_info = user_info[0] if user_info[0] else self.__create_blank_user__()
+        # 直接修改成传进去 deviceId
+        self.user_info = self.__create_blank_user__(deviceId)
         if self.user_info['exchangeFlag']:
+            # 交换
             self.exchange_secret()
+            # 登录
             self.login(phone, password)
-        
-        """
-        with open(user_info[1].format(phone), 'w') as f:
-            f.write(self.save_user_info())
-        """
-
+        # print(self.user_info)
         # token
         self.token_string = "None"
 
     @staticmethod
-    def __create_blank_user__():
+    def __create_blank_user__(deviceId):
         """
         当传入的已登录设备信息不可用时，虚拟一个空的未登录设备
         :return: 空设备信息
@@ -46,7 +43,7 @@ class CampusCard:
             'exchangeFlag': True,
             'login': False,
             'serverPublicKey': '',
-            'deviceId': str(random.randint(999999999999999, 9999999999999999)),
+            'deviceId': str(deviceId),
             'wanxiaoVersion': 10462101,
             'rsaKey': {
                 'private': rsa_keys[1],
@@ -94,7 +91,7 @@ class CampusCard:
             "requestMethod": "cam_iface46/loginnew.action",
             "shebeixinghao": "MLA-AL10",
             "systemType": "android",
-            "telephoneInfo": "5.1.1",
+            "telephoneInfo": "5.2.1",
             "telephoneModel": "HUAWEI MLA-AL10",
             "type": "1",
             "userName": phone,
@@ -115,44 +112,9 @@ class CampusCard:
             self.data = resp["data"]
             self.user_info["login"] = True
             self.user_info["exchangeFlag"] = False
-        
-        # 这里做个赋值
-        self.token_string = self.user_info["sessionId"]
-
         return resp["result_"]
 
-    def get_bill(self, from_date, end_date):
-        """
-        获取指定日期范围内的校园卡消费记录
-        :param from_date: 查询开始日期
-        :param end_date: 查询结束日期
-        :return: 查询结果
-        """
-        resp = requests.post(
-            "http://server.17wanxiao.com/YKT_Interface/xyk",
-            headers={
-                "Referer": "http://server.17wanxiao.com/YKT_Interface/v2/index.html"
-                           "?utm_source=app"
-                           "&utm_medium=plugin"
-                           "&UAinfo=wanxiao"
-                           "&versioncode={args[wanxiaoVersion]}"
-                           "&customerId=504"
-                           "&systemType=Android"
-                           "&token={args[sessionId]}".format(args=self.user_info),
-                "Origin": "http://server.17wanxiao.com",
-                "User-Agent": "Mozilla/5.0 (Linux; Android 5.1.1; HUAWEI MLA-AL10 Build/HUAWEIMLA-AL10; wv) "
-                              "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile "
-                              "Safari/537.36 Wanxiao/4.6.2",
-            },
-            data={
-                "token": self.user_info["sessionId"],
-                "method": "XYK_TRADE_DETAIL",
-                "param": '{"beginDate":"' + from_date + '","endDate":"' + end_date + '","beginIndex":0,"count":20}'
-            },
-            verify=False
-        ).json()
-        return json.loads(resp["body"])
-
+    # 需要调用一下 不然无法激活token
     def get_main_info(self):
         resp = requests.post(
             "https://server.17wanxiao.com/YKT_Interface/xyk",
@@ -163,12 +125,10 @@ class CampusCard:
                            "&UAinfo=wanxiao"
                            "&versioncode={args[wanxiaoVersion]}"
                            "&customerId=504"
-                           "&systemType=Android"
+                           "&systemType=ios"
                            "&token={args[sessionId]}".format(args=self.user_info),
                 "Origin": "https://server.17wanxiao.com",
-                "User-Agent": "Mozilla/5.0 (Linux; Android 5.1.1; HUAWEI MLA-AL10 Build/HUAWEIMLA-AL10; wv) "
-                              "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile "
-                              "Safari/537.36 Wanxiao/4.6.2",
+                "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1.1; HUAWEI MLA-AL10 Build/HUAWEIMLA-AL10)",
             },
             data={
                 "token": self.user_info["sessionId"],
@@ -177,25 +137,14 @@ class CampusCard:
             },
             verify=False
         ).json()
-        # 这里做个赋值
+        # 这里做个赋值 拿到 token
         self.token_string = self.user_info["sessionId"]
-        return json.loads(resp["body"])
+        # print(resp)
+        try:
+            return json.loads(resp["body"])
+        except Exception:
+            return resp
 
-    def save_user_info(self):
-        """
-        保存当前的设备信息
-        :return: 当前设备信息的json字符串
-        """
-        return json.dumps(self.user_info)
-
+    # 返回token 做别的操作
     def get_token(self):
         return str(self.token_string)
-
-def open_device(f):
-    try:
-        device_file = open(f, "r")
-        device = json.loads(device_file.read())
-        device_file.close()
-    except:
-        device = None
-    return device, f

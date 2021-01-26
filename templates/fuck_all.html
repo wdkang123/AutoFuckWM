@@ -20,12 +20,14 @@
               <col>
               <col>
               <col>
+              <col>
             </colgroup>
             <thead>
               <tr>
                 <th>名字</th>
                 <th>电话</th>
                 <th>今日打卡状态</th>
+                <th>设备ID</th>
               </tr> 
             </thead>
             <tbody>
@@ -55,6 +57,7 @@
                     <span class="layui-badge">打卡异常</span>
                   </td>
                 {% endif %}
+                <td>{{ item.deviceId }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -71,19 +74,6 @@
     <script>
         layui.use('element', function(){
           var element = layui.element;
-
-        });
-        layui.use('form', function(){
-          var form = layui.form;
-          
-          //监听提交
-          form.on('submit(formDemo)', function(data){
-            layer.msg(JSON.stringify(data.field));
-            let username = data.field.username;
-            let password = data.field.password;
-            window.location = "/token/" + username + "/" + password;
-            return false;
-          });
         });
     </script>
 </body>

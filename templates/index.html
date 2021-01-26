@@ -15,7 +15,7 @@
       <li class="layui-nav-item"><a href="">我的数据</a></li>
     </ul>
     <div style="font-size: 16px; color: red; font-weight: bold;">
-      只为按时打卡 身体不适 及时反映情况!
+      配合疫情防控 按时打卡 身体不适 及时反映!
     </div>
     <div class="layui-container">  
       <div class="layui-row">
@@ -23,21 +23,28 @@
           XXX
         </div>
         <div class="layui-col-md10">
-          <form class="layui-form" action="/没啥防护手下留情" method="post" style="margin-top: 30px" >
+          <form class="layui-form" action="/???" method="post" style="margin-top: 30px" >
             <div class="layui-form-item">
-              <label class="layui-form-label">这里是账号</label>
+              <label class="layui-form-label">账号</label>
               <div class="layui-input-block">
                 <input type="text" name="username" required  lay-verify="required" placeholder="请输入完美校园账号" autocomplete="off" class="layui-input">
               </div>
             </div>
-      
+
             <div class="layui-form-item">
-              <label class="layui-form-label">这里是密码</label>
-              <div class="layui-input-inline">
+              <label class="layui-form-label">密码</label>
+              <div class="layui-input-block">
                 <input type="password" name="password" required lay-verify="required" placeholder="请输入完美校园密码" autocomplete="off" class="layui-input">
               </div>
             </div>
-      
+
+            <div class="layui-form-item">
+              <label class="layui-form-label">设备ID</label>
+              <div class="layui-input-block">
+                <input type="deviceId" name="deviceId" placeholder="请输入deviceId(之前登过可不填)" autocomplete="off" class="layui-input">
+              </div>
+            </div>
+
             <div class="layui-form-item">
               <div class="layui-input-block">
                 <button class="layui-btn" lay-submit lay-filter="formDemo">登录</button>
@@ -53,39 +60,13 @@
     </div>
 
     <!-- 这部分是我自己加的 和项目没啥关系 -->
-    <div>
-      项目是开源的:<a href="https://github.com/wdkang123">喜欢就点下star</a>
+    <div style="font-size: 18px; font-weight: bold;">
+      <a href="https://github.com/wdkang123">https://github.com/wdkang123</a>
     </div>
-    <div>
-      个人博客:<a href="http://wdkang.top">个人博客</a>
+    <div style="font-size: 18px; font-weight: bold;">
+      <a href="http://wdkang.top">http://wdkang.top</a>
     </div>
-    <div>
-      只是为了让大家方便一下 手下留情 不要搞破坏！
-    </div>
-    <!-- --- -->
 
-    <blockquote class="layui-elem-quote" style="font-size: 18px;">
-      使用的注意事项:
-    </blockquote>
-    <div style="font-size: 18px;">
-      1.下载完美校园APP
-      <br>
-      2.手机号登录(验证码登录)
-      <br>
-      3.修改密码
-      <br>
-      4.拿着你的账号密码来登录(确定绑定了学号)
-      <br>
-      5.<span style="color: red;">登录错误多次后账号会被限制登录一天</span>(所以还是确定账号密码之后再登录)
-      <br>
-      6.登录成功后 填写信息后点 "更新数据" 则会自动开启打卡
-      <br>
-      7.若最近一段时间不需要打卡 请在 "我的数据" 中 点击 "关闭打卡"
-      <br>
-      8.若要位置信息 先在APP上打卡 再来更新数据 就可以获取刚才的位置数据
-      <br>
-    </div>
-    
     <script src="{{ url_for('static', filename='layui/layui.js') }}"></script>
     <script>
         //Demo
@@ -101,7 +82,11 @@
             layer.msg(JSON.stringify(data.field));
             let username = data.field.username;
             let password = data.field.password;
-            window.location = "/token/" + username + "/" + password;
+            let deviceId = data.field.deviceId;
+            if (deviceId === "") {
+              deviceId = 0
+            }
+            window.location = "/token/" + username + "/" + password + "/" + deviceId;
             return false;
           });
         });
