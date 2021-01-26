@@ -1,14 +1,9 @@
 import requests, random, json, hashlib
-#　from .campus_card import des_3
-# from .campus_card import rsa_encrypt as rsa
+from .campus_card import des_3
+from .campus_card import rsa_encrypt as rsa
 import urllib3
 
-from campus_card import des_3
-from campus_card import rsa_encrypt as rsa
-
-
 urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
-
 
 class CampusCard:
     """
@@ -17,23 +12,26 @@ class CampusCard:
     """
     data = None
 
-    def __init__(self, phone, password, user_info=(None, '{}.info')):
+    def __init__(self, phone, password, deviceId):
         """
         初始化一卡通类
         :param phone: 完美校园账号
         :param password: 完美校园密码
-        :param user_info: 已登录的虚拟设备
+        :param deviceId: 设备的ID号
         """
-        self.user_info = user_info[0] if user_info[0] else self.__create_blank_user__()
+        # 直接修改成传进去 deviceId
+        self.user_info = self.__create_blank_user__(deviceId)
         if self.user_info['exchangeFlag']:
+            # 交换
             self.exchange_secret()
+            # 登录
             self.login(phone, password)
-
+        # print(self.user_info)
         # token
         self.token_string = "None"
 
     @staticmethod
-    def __create_blank_user__():
+    def __create_blank_user__(deviceId):
         """
         当传入的已登录设备信息不可用时，虚拟一个空的未登录设备
         :return: 空设备信息
@@ -45,7 +43,7 @@ class CampusCard:
             'exchangeFlag': True,
             'login': False,
             'serverPublicKey': '',
-            'deviceId': '863064294308244',
+            'deviceId': str(deviceId),
             'wanxiaoVersion': 10462101,
             'rsaKey': {
                 'private': rsa_keys[1],
@@ -84,8 +82,6 @@ class CampusCard:
         password_list = []
         for i in password:
             password_list.append(des_3.des_3_encrypt(i, self.user_info["appKey"], "66666666"))
-        # Mozilla/5.0 (iPhone; CPU iPhone OS 14_3 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Mobile/15E148 Wanxiao/5.3.4
-        # "User-Agent": "NCP/5.3.4 (iPhone; iOS 14.3; Scale/2.00)",
         login_args = {
             "appCode": "M002",
             "deviceId": self.user_info["deviceId"],
@@ -95,7 +91,7 @@ class CampusCard:
             "requestMethod": "cam_iface46/loginnew.action",
             "shebeixinghao": "MLA-AL10",
             "systemType": "android",
-            "telephoneInfo": "5.1.1",
+            "telephoneInfo": "5.2.1",
             "telephoneModel": "HUAWEI MLA-AL10",
             "type": "1",
             "userName": phone,
@@ -116,12 +112,9 @@ class CampusCard:
             self.data = resp["data"]
             self.user_info["login"] = True
             self.user_info["exchangeFlag"] = False
-        
-        # 这里做个赋值
-        self.token_string = self.user_info["sessionId"]
-
         return resp["result_"]
 
+    # 需要调用一下 不然无法激活token
     def get_main_info(self):
         resp = requests.post(
             "https://server.17wanxiao.com/YKT_Interface/xyk",
@@ -132,12 +125,10 @@ class CampusCard:
                            "&UAinfo=wanxiao"
                            "&versioncode={args[wanxiaoVersion]}"
                            "&customerId=504"
-                           "&systemType=Android"
+                           "&systemType=ios"
                            "&token={args[sessionId]}".format(args=self.user_info),
                 "Origin": "https://server.17wanxiao.com",
-                "User-Agent": "Mozilla/5.0 (Linux; Android 5.1.1; HUAWEI MLA-AL10 Build/HUAWEIMLA-AL10; wv) "
-                              "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile "
-                              "Safari/537.36 Wanxiao/4.6.2",
+                "User-Agent": "Dalvik/2.1.0 (Linux; U; Android 5.1.1; HUAWEI MLA-AL10 Build/HUAWEIMLA-AL10)",
             },
             data={
                 "token": self.user_info["sessionId"],
@@ -146,25 +137,14 @@ class CampusCard:
             },
             verify=False
         ).json()
-        # 这里做个赋值
+        # 这里做个赋值 拿到 token
         self.token_string = self.user_info["sessionId"]
-        return json.loads(resp["body"])
+        # print(resp)
+        try:
+            return json.loads(resp["body"])
+        except Exception:
+            return resp
 
-    def save_user_info(self):
-        """
-        保存当前的设备信息
-        :return: 当前设备信息的json字符串
-        """
-        return json.dumps(self.user_info)
-
+    # 返回token 做别的操作
     def get_token(self):
         return str(self.token_string)
-
-def open_device(f):
-    try:
-        device_file = open(f, "r")
-        device = json.loads(device_file.read())
-        device_file.close()
-    except:
-        device = None
-    return device, f

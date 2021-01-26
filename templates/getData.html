@@ -23,7 +23,7 @@
     <div class="form_box">
       <div>
         <!-- 提交的form表单在这里 -->
-        <form class="layui-form" action="/save_data/{{ user_data.user_name }}/{{ user_data.pass_word}}" method="post">
+        <form class="layui-form" action="/save_data/{{ user_data.user_name }}/{{ user_data.pass_word}}/{{ user_data.deviceId }}" method="post">
           <!-- 
           item['decription'] = str(each['decription'])
           item['propertyname'] = str(each['propertyname'])
@@ -85,7 +85,7 @@
 
           
           <blockquote class="layui-elem-quote">
-            下面获取的数据 不需要修改 如果要修改请去APP里打一次卡 就会获取最新的打卡数据
+            下面获取的数据 不需要修改 如果要修改请去打一次卡 就会获取最新的打卡数据
           </blockquote>
           <!--     
           user_data['areaStr'] = data['areaStr']
@@ -270,7 +270,7 @@
           //监听提交
           form.on('submit(formDemo)', function(data){
             layer.msg(JSON.stringify(data.field));
-            console.log(JSON.stringify(data.field));
+            // console.log(JSON.stringify(data.field));
             return true;
           });
         });

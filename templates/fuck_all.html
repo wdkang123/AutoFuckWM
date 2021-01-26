@@ -15,15 +15,9 @@
           -
         </div>
         <div class="layui-col-md10">
-	  <div style="color: red; font-size: 18px;">
-		打卡状态 在23:15会将当天正常打卡的用户状态重置为"等待打卡"
-	        <br />
-	        并在第二天5:15-7:00之间给状态为"等待打卡"的用户进行打卡
-		<br />
-		再次修改密码可能导致更新数据失败 忘记密码或者改了密码出现问题的小伙伴联系我
-	  </div>
           <table class="layui-table">
             <colgroup>
+              <col>
               <col>
               <col>
               <col>
@@ -33,6 +27,7 @@
                 <th>名字</th>
                 <th>电话</th>
                 <th>今日打卡状态</th>
+                <th>设备ID</th>
               </tr> 
             </thead>
             <tbody>
@@ -62,6 +57,7 @@
                     <span class="layui-badge">打卡异常</span>
                   </td>
                 {% endif %}
+                <td>{{ item.deviceId }}</td>
               </tr>
               {% endfor %}
             </tbody>
@@ -78,19 +74,6 @@
     <script>
         layui.use('element', function(){
           var element = layui.element;
-
-        });
-        layui.use('form', function(){
-          var form = layui.form;
-          
-          //监听提交
-          form.on('submit(formDemo)', function(data){
-            layer.msg(JSON.stringify(data.field));
-            let username = data.field.username;
-            let password = data.field.password;
-            window.location = "/token/" + username + "/" + password;
-            return false;
-          });
         });
     </script>
 </body>
