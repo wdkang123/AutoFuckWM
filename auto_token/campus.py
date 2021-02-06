@@ -95,7 +95,7 @@ class CampusCard:
             "telephoneModel": "HUAWEI MLA-AL10",
             "type": "1",
             "userName": phone,
-            "wanxiaoVersion": 10462101,
+            "wanxiaoVersion": 10525101,
             "yunyingshang": "07"
         }
         upload_args = {

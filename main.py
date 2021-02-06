@@ -40,6 +40,7 @@ def index():
     user_data = []
     return render_template('index.html', user_data=user_data)
 
+
 # 获得token
 @app.route('/token/<username>/<password>/<deviceId>')
 def token(username=None, password=None, deviceId=None):
@@ -236,7 +237,7 @@ def save_data(username=None, password=None, deviceId=None):
             sql = "insert into auto_check values(0,'" + str(username) + "', '" + str(password) + "', '" + str(save_data) + "', " + "'0'," + str(deviceId) + ");"
         # 否则是更新数据
         else:
-            sql = "update auto_check set status=0, data='" + str(save_data) + "', password='" + str(password) + + "', deviceId='" + str(deviceId) + "' where username='" + str(username) + "';"
+            sql = "update auto_check set status=0, data='" + str(save_data) + "', password='" + str(password) + "', deviceId='" + str(deviceId) + "' where username='" + str(username) + "';"
         dao.execute_sql(sql)
         dao.close()
         return redirect("/get_my_data/" + str(username) + "/" + str(password) + "/" + str(deviceId))
@@ -373,12 +374,15 @@ def get_token(username=None, password=None):
 
 # 一人token 多人打卡
 @app.route('/new_fuck_it/<username>/<password>/<token>')
-def new_fuck_it(username=None, password=None):
+def new_fuck_it(username=None, password=None, token=None):
     if not username:
         error_string = "用户名不能为空"
         return render_template('error.html', error_string=error_string)
     if not password:
         error_string = "密码不能为空"
+        return render_template('error.html', error_string=error_string)
+    if not token:
+        error_string = "token不能为空"
         return render_template('error.html', error_string=error_string)
     # 先判断数据是否存在 没有必要先登录
     dao.connect(dao_url, dao_username, dao_password)    
@@ -391,7 +395,6 @@ def new_fuck_it(username=None, password=None):
         error_string = "要先登录 才能打卡"
         return render_template('error.html', error_string=error_string)
     # 取到数据 直接打卡
-    # 这里已经激活token
     # 提交数据
     url = 'https://reportedh5.17wanxiao.com/sass/api/epmpics'
     headers = {
@@ -402,7 +405,7 @@ def new_fuck_it(username=None, password=None):
             "accept-language": "zh-cn",
             "User-Agent": "Mozilla/5.0 (Linux; Android 5.1.1; HUAWEI MLA-AL10 Build/HUAWEIMLA-AL10; wv) "
                               "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile "
-                              "Safari/537.36 Wanxiao/4.6.2",
+                              "Safari/537.36 Wanxiao/4.6.2"
     }
     dao.connect(dao_url, dao_username, dao_password)
     try:

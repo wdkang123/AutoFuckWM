@@ -17,6 +17,10 @@
 
 ## 更细说明
 
+**2021/2/6**: 终于有时间 更新了计算DeviceId 通过模拟流程 免除模拟器 [themanforfree](https://github.com/themanforfree)/**[HAUT-checkin](https://github.com/themanforfree/HAUT-checkin)** 感谢！
+
+
+
 **2021/1/26:** 更新了DeviceId （更新坐标可以通过支付宝 这样不会有新设备）平常填写通过本项目的服务就可以（mysql中已经记录了上次的deviceId 所以之后就可以自动打卡了）=> **感谢大家的付出:** https://github.com/YooKing/HAUT_autoCheck/issues/51 再次感谢大家无私奉献的精神！
 
 
@@ -244,6 +248,12 @@ send_status 是发送打卡结果的微信通知（这里用的是pushplus）
 感谢 [Tishacy](https://github.com/Tishacy)/**[ZJU-nCov-Hitcarder](https://github.com/Tishacy/ZJU-nCov-Hitcarder)**
 
 思路上也参考了一部分
+
+
+
+感谢 [themanforfree](https://github.com/themanforfree)/**[HAUT-checkin](https://github.com/themanforfree/HAUT-checkin)**
+
+简化了计算deviceId的流程
 
 
 
