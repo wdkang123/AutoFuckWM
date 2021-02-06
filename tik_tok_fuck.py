@@ -52,6 +52,7 @@ def new_fuck():
         print("获取失败token")
         return "获取token失败"
     token = str(resp)
+    print(token)
     # 获取所有需要打卡的用户
     dao.connect(dao_url, dao_username, dao_password)
     sql = "select id, username, password, status from auto_check where status=0;"
@@ -69,8 +70,9 @@ def new_fuck():
             # 打卡成功
             sql = "update auto_check set status='1' where id='" + str(user_id) + "';"
             dao.execute_sql(sql)
-            # print(str(username) + "打卡成功")
+            print(str(username) + "打卡成功")
         else:
+            print(resp)
             # 打卡异常
             sql = "update auto_check set status='3' where id='" + str(user_id) + "';"
             dao.execute_sql(sql)
@@ -88,7 +90,7 @@ def fuck_check():
     dao.connect(dao_url, dao_username, dao_password)
     # 0-开启打卡 | 1-已经打卡 | 2-关闭打卡 | 3-打卡异常 (3时为不打卡)
     # 查询出所有状态为0的用户
-    sql = "select id, username, password, status from auto_check where status=0;"
+    sql = "select id, username, password, status, deviceId from auto_check where status=0;"
     rows = dao.execute_sql(sql)
     # print(rows)
     for row in rows:
@@ -96,13 +98,15 @@ def fuck_check():
         user_id = row[0]
         username = row[1]
         password = row[2]
+        # 在flask服务上 会自动从服务器上获取 deviceId
+        # deviceId = row[4]
         url = "http://" + str(server_ip) + ":" + str(server_port) + "/fuck_it/" + str(username) + "/" + str(password)
         response = requests.get(url)
         resp = response.text
         # 在首页提交数据后 状态会调整为0
         if str(resp) == "打卡成功":
             # 打卡成功
-            print(resp)
+            # print(resp)
             sql = "update auto_check set status='1' where id='" + str(user_id) + "';"
             dao.execute_sql(sql)
             # print(str(username) + "打卡成功")
@@ -112,10 +116,10 @@ def fuck_check():
             dao.execute_sql(sql)
             # 将异常信息写入数据库
             # 这里需要记录一下 有很多次异常了 但是不知道为什么异常了
-            print(resp)
+            # print(resp)
             sql = "insert into error_record values(default," + "'" + str(username) + "', '" + str(resp) + "', '" + str(time.strftime("%Y-%m-%d")) + "')"
             dao.execute_sql(sql)
-        time.sleep(10)
+        time.sleep(5)
     dao.close()
 
 # 发送打卡报告
@@ -201,10 +205,10 @@ scheduler = BlockingScheduler()
 # 18点15分重置等待打卡
 scheduler.add_job(reset_status, 'cron', day_of_week='0-6', hour=18, minute=15)
 # 一个token 多人打卡 （凌晨打卡）
-scheduler.add_job(new_fuck, 'cron', day_of_week='0-6', hour=0, minute=15)
+scheduler.add_job(new_fuck, 'cron', day_of_week='0-6', hour=0, minute=5)
 # 一人一个token
 # scheduler.add_job(fuck_check, 'cron', day_of_week='0-6', hour=9, minute=21)
 # 发送报告
-scheduler.add_job(send_status, 'cron', day_of_week='0-6', hour=0, minute=20)
+scheduler.add_job(send_status, 'cron', day_of_week='0-6', hour=0, minute=10)
 print("========== 启动成功 ===========")
 scheduler.start()
