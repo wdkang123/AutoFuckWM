@@ -119,7 +119,7 @@ def fuck_check():
             # print(resp)
             sql = "insert into error_record values(default," + "'" + str(username) + "', '" + str(resp) + "', '" + str(time.strftime("%Y-%m-%d")) + "')"
             dao.execute_sql(sql)
-        time.sleep(5)
+        time.sleep(10)
     dao.close()
 
 # 发送打卡报告
@@ -203,12 +203,12 @@ scheduler = BlockingScheduler()
 # cron: 在特定时间周期性地触发
 
 # 18点15分重置等待打卡
-scheduler.add_job(reset_status, 'cron', day_of_week='0-6', hour=18, minute=15)
+scheduler.add_job(reset_status, 'cron', day_of_week='0-6', hour=10, minute=35)
 # 一个token 多人打卡 （凌晨打卡）
-scheduler.add_job(new_fuck, 'cron', day_of_week='0-6', hour=0, minute=5)
+# scheduler.add_job(new_fuck, 'cron', day_of_week='0-6', hour=10, minute=35)
 # 一人一个token
-# scheduler.add_job(fuck_check, 'cron', day_of_week='0-6', hour=9, minute=21)
+scheduler.add_job(fuck_check, 'cron', day_of_week='0-6', hour=10, minute=36)
 # 发送报告
-scheduler.add_job(send_status, 'cron', day_of_week='0-6', hour=0, minute=10)
+scheduler.add_job(send_status, 'cron', day_of_week='0-6', hour=10, minute=38)
 print("========== 启动成功 ===========")
 scheduler.start()
