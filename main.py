@@ -463,10 +463,11 @@ def fuck_it(username=None, password=None):
     token = str(cc.get_token())
     # 激活token
     msg = active_token(token)
+    '''
     if msg != "成功":
         error_string = "token激活失败"
         return render_template('error.html', error_string=error_string)
-
+    '''
     # 这里已经激活token
     # 提交数据
     url = 'https://reportedh5.17wanxiao.com/sass/api/epmpics'
