@@ -21,17 +21,18 @@ server_port = str(cfg.get("server", "SERVER_PORT"))
 
 # pushplus的token
 pp_token = str(cfg.get("server", "PUSHPLUAH_TOKEN"))
+pp_group = str(cfg.get("server", "PUSHPLUAH_GROUP"))
 
 # database
 dao = DataDao()
 dao_url = str(cfg.get("mysql", "HOST"))
 dao_username = str(cfg.get("mysql", "USERNAME"))
 dao_password = str(cfg.get("mysql", "PASSWORD"))
-
+dao_port = str(cfg.get("mysql", "PORT"))
 
 # 重置状态
 def reset_status():
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     # 只操作为0的 因为2为暂停 3为异常 这两个情况都略过
     sql = "update auto_check set status=0 where status=1;"
     dao.execute_sql(sql)
@@ -54,11 +55,11 @@ def new_fuck():
     token = str(resp)
     print(token)
     # 获取所有需要打卡的用户
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     sql = "select id, username, password, status from auto_check where status=0;"
     rows = dao.execute_sql(sql)
     for row in rows:
-         # 正常打卡
+        # 正常打卡
         user_id = row[0]
         username = row[1]
         password = row[2]
@@ -87,14 +88,14 @@ def new_fuck():
 # 一人一token
 # 打卡函数
 def fuck_check():
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     # 0-开启打卡 | 1-已经打卡 | 2-关闭打卡 | 3-打卡异常 (3时为不打卡)
     # 查询出所有状态为0的用户
     sql = "select id, username, password, status, deviceId from auto_check where status=0;"
     rows = dao.execute_sql(sql)
     # print(rows)
     for row in rows:
-         # 正常打卡
+        # 正常打卡
         user_id = row[0]
         username = row[1]
         password = row[2]
@@ -125,14 +126,13 @@ def fuck_check():
 # 发送打卡报告
 # 这块还不太行 看看怎么可以好看一些
 def send_status():
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     # 打卡总人数
     sql = "select count(id) from auto_check"
     rows = dao.execute_sql(sql)
     all_nums = 0
     for row in rows:
         all_nums = row[0]
-    
     # 等待打卡的人数
     sql = "select count(*) from auto_check where status = 0"
     rows = dao.execute_sql(sql)
@@ -146,7 +146,6 @@ def send_status():
     success_nums = 0
     for row in rows:
         success_nums = row[0]
-    
     # 暂停打卡的人数
     sql = "select count(*) from auto_check where status = 2"
     rows = dao.execute_sql(sql)
@@ -184,16 +183,17 @@ def send_status():
             html_string = str(html_string) + str(each['username']) + ' : 失败' + "<br>"
     html_string = str(html_string) + "-----" + "<br>"
     html_string = str(html_string) + \
-        '<a href="http://wdkangtv.top:8086/fuck_all"><button>点击查看所有打卡状况</button></a>'
+        '<a href="http://' + str(server_ip) + ':' + str(server_port) + '/fuck_all"><button>点击查看所有打卡状况</button></a>'
     html_string = str(html_string) + \
-	'<a href="http://wdkangtv.top:8086/index"><button>点击进入打卡主页</button></a>'
-    server_msg = "http://pushplus.hxtrip.com/send?token=" + \
+	'<a href="http://' + str(server_ip) + ':' + str(server_port) + '/index"><button>点击进入打卡主页</button></a>'
+    server_msg = "http://www.pushplus.plus/send?token=" + \
         str(pp_token) + "&title=打卡统计表&content=" + \
         str(html_string) + \
-        "&template=html&topic=user"
+        "&template=html&topic=" + str(pp_group)
     dao.close()
+    # 发送内容 推送至微信
     requests.get(url=server_msg)
-    
+
 
 # BlockingScheduler
 scheduler = BlockingScheduler()
@@ -203,12 +203,16 @@ scheduler = BlockingScheduler()
 # cron: 在特定时间周期性地触发
 
 # 18点15分重置等待打卡
-scheduler.add_job(reset_status, 'cron', day_of_week='0-6', hour=10, minute=35)
-# 一个token 多人打卡 （凌晨打卡）
+scheduler.add_job(reset_status, 'cron', day_of_week='0-6', hour=18, minute=15)
+
+# 一个token 多人打卡 （凌晨打卡）不推荐
 # scheduler.add_job(new_fuck, 'cron', day_of_week='0-6', hour=10, minute=35)
+
 # 一人一个token
 scheduler.add_job(fuck_check, 'cron', day_of_week='0-6', hour=10, minute=36)
+
 # 发送报告
 scheduler.add_job(send_status, 'cron', day_of_week='0-6', hour=10, minute=38)
+
 print("========== 启动成功 ===========")
 scheduler.start()

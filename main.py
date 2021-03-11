@@ -30,7 +30,11 @@ dao = DataDao()
 dao_url = str(cfg.get("mysql", "HOST"))
 dao_username = str(cfg.get("mysql", "USERNAME"))
 dao_password = str(cfg.get("mysql", "PASSWORD"))
+dao_port = str(cfg.get("mysql", "PORT"))
 
+# 你flask启动的服务
+server_ip = str(cfg.get("server", "SERVER_IP"))
+server_port = str(cfg.get("server", "SERVER_PORT"))
 
 # 定义一个可以用来打卡的全局token
 active_token_string = ""
@@ -55,7 +59,7 @@ def token(username=None, password=None, deviceId=None):
         return render_template('error.html', error_string=error_string)
     if str(deviceId) == "0":
         # 这里为了简化 之前如果登陆过 设备号填0就从服务器找
-        dao.connect(dao_url, dao_username, dao_password)
+        dao.connect(dao_url, dao_username, dao_password, dao_port)
         sql = "select deviceId from auto_check where username='" + str(username) + "'"
         rows = dao.execute_sql(sql)
         dao.close()
@@ -104,28 +108,30 @@ def getData(token=None, username=None, password=None, deviceId=None):
         data = data['data']
     except Exception as e:
         return render_template('error.html', error_string=str(e))
-    
     #　==================================================
     # 公告 写一写注意事项
     declared_data = {}
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     sql = "select * from declared"
     rows = dao.execute_sql(sql)
 
     # 这里更新下账号密码 防止用户修改密码后 导致完美和mysql不一致
     user_sql = "update auto_check set password='" + str(password) + "' where username='" + str(username) + "';"
     dao.execute_sql(user_sql)
-
     dao.close()
-    declared_data['data'] = rows[0][1]
+    # 公告为空是 会有异常
+    try:
+        declared_data['data'] = rows[0][1]
+    except Exception:
+        declared_data['data'] = "暂时没有公告"
     # 提交数据 需要的部分
     user_data = {}
 
     # 把devicedId也带上
     user_data['deviceId'] = str(deviceId)
 
-    # 区域的信息 
-    # areaStr => {'province': '山东省', 'city': 'XX市'} 
+    # 区域的信息
+    # areaStr => {'province': '山东省', 'city': 'XX市'}
     user_data['areaStr'] = data['areaStr']
     # customerid => XXXX
     user_data['customerid'] = data['customerid']
@@ -142,7 +148,7 @@ def getData(token=None, username=None, password=None, deviceId=None):
     # token => XX-XX-XX-XX
     user_data['token'] = str(token)
     # 这个是用户的账号和密码
-    # user_name 
+    # user_name
     user_data['user_name'] = str(username)
     # pass_word
     user_data['pass_word'] = str(password)
@@ -227,7 +233,7 @@ def save_data(username=None, password=None, deviceId=None):
         save_data = re.sub("b'", "", str(save_data))
         save_data = re.sub("'", "", str(save_data))
         # 先判断该用户是否存在
-        dao.connect(dao_url, dao_username, dao_password)
+        dao.connect(dao_url, dao_username, dao_password, dao_port)
         sql = "select * from auto_check where username='" + str(username) + "';"
         rows = dao.execute_sql(sql)
         # 说明用户之前没有数据
@@ -253,11 +259,15 @@ def get_my_data(username=None, password=None, deviceId=None):
         return render_template('error.html', error_string=error_string)
     # 公告 写一写注意事项
     declared_data = {}
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     sql = "select * from declared"
     rows = dao.execute_sql(sql)
-    declared_data['data'] = rows[0][1]
-    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';"   
+    # 公告为空时 会导致异常
+    try:
+        declared_data['data'] = rows[0][1]
+    except Exception:
+        declared_data['data'] = "暂时没有公告"
+    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';"
     rows = dao.execute_sql(sql)
     dao.close()
     # 用户的打卡数据
@@ -288,7 +298,7 @@ def update(username=None, password=None, status=None):
     if not status:
         error_string = "状态不能为空"
         return render_template('error.html', error_string=error_string)
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     sql = "update auto_check set status='" + str(status) + "' where username='" + str(username) + "' and password='" + str(password) + "';"
     dao.execute_sql(sql)
     dao.close()
@@ -297,7 +307,7 @@ def update(username=None, password=None, status=None):
 
 @app.route('/fuck_all')
 def fuck_all():
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     sql = "select * from auto_check"
     rows = dao.execute_sql(sql)
     dao.close()
@@ -345,8 +355,8 @@ def get_token(username=None, password=None):
         error_string = "密码不能为空"
         return render_template('error.html', error_string=error_string)
     # 先判断数据是否存在 没有必要先登录
-    dao.connect(dao_url, dao_username, dao_password)    
-    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';" 
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
+    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';"
     rows = dao.execute_sql(sql)
     dao.close()
     # 账号密码存在 下面开始获取token
@@ -385,8 +395,8 @@ def new_fuck_it(username=None, password=None, token=None):
         error_string = "token不能为空"
         return render_template('error.html', error_string=error_string)
     # 先判断数据是否存在 没有必要先登录
-    dao.connect(dao_url, dao_username, dao_password)    
-    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';" 
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
+    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';"
     rows = dao.execute_sql(sql)
     dao.close()
     try:
@@ -407,7 +417,7 @@ def new_fuck_it(username=None, password=None, token=None):
                               "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile "
                               "Safari/537.36 Wanxiao/4.6.2"
     }
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     try:
         data = json.loads(data)
         data['jsonData']['token'] = str(token)
@@ -442,8 +452,8 @@ def fuck_it(username=None, password=None):
         error_string = "密码不能为空"
         return render_template('error.html', error_string=error_string)
     # 先判断数据是否存在 没有必要先登录
-    dao.connect(dao_url, dao_username, dao_password)    
-    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';" 
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
+    sql = "select * from auto_check where username='" + str(username) + "' and password='" + str(password) + "';"
     rows = dao.execute_sql(sql)
     dao.close()
     try:
@@ -481,7 +491,7 @@ def fuck_it(username=None, password=None):
                               "AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/74.0.3729.136 Mobile "
                               "Safari/537.36 Wanxiao/4.6.2",
     }
-    dao.connect(dao_url, dao_username, dao_password)
+    dao.connect(dao_url, dao_username, dao_password, dao_port)
     try:
         data = json.loads(data)
         data['jsonData']['token'] = str(token)
@@ -508,7 +518,7 @@ def fuck_it(username=None, password=None):
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port='8086', debug=True)
+    app.run(host='0.0.0.0', port=str(server_port), debug=False)
 
 
 # 收尾
