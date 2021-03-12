@@ -1,19 +1,3 @@
-/*
- Navicat Premium Data Transfer
-
- Source Server         : 47.100.119.23
- Source Server Type    : MySQL
- Source Server Version : 50564
- Source Host           : 47.100.119.23:3306
- Source Schema         : auto_fuck
-
- Target Server Type    : MySQL
- Target Server Version : 50564
- File Encoding         : 65001
-
- Date: 24/02/2021 21:28:17
-*/
-
 SET NAMES utf8mb4;
 SET FOREIGN_KEY_CHECKS = 0;
 

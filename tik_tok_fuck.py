@@ -30,6 +30,14 @@ dao_username = str(cfg.get("mysql", "USERNAME"))
 dao_password = str(cfg.get("mysql", "PASSWORD"))
 dao_port = str(cfg.get("mysql", "PORT"))
 
+# tiktok 打卡时间
+reset_hour = str(cfg.get("tiktok", "RESET_HOUR"))
+reset_minute = str(cfg.get("tiktok", "RESET_MINUTE"))
+tik_hour = str(cfg.get("tiktok", "TIK_HOUR"))
+tik_minute = str(cfg.get("tiktok", "TIK_MINUTE"))
+push_hour = str(cfg.get("tiktok", "PUSH_HOUR"))
+push_minute = str(cfg.get("tiktok", "PUSH_MINUTE"))
+
 # 重置状态
 def reset_status():
     dao.connect(dao_url, dao_username, dao_password, dao_port)
@@ -120,7 +128,7 @@ def fuck_check():
             # print(resp)
             sql = "insert into error_record values(default," + "'" + str(username) + "', '" + str(resp) + "', '" + str(time.strftime("%Y-%m-%d")) + "')"
             dao.execute_sql(sql)
-        time.sleep(10)
+        time.sleep(15)
     dao.close()
 
 # 发送打卡报告
@@ -202,17 +210,16 @@ scheduler = BlockingScheduler()
 # interval: 固定时间间隔触发
 # cron: 在特定时间周期性地触发
 
-# 18点15分重置等待打卡
-scheduler.add_job(reset_status, 'cron', day_of_week='0-6', hour=18, minute=15)
+scheduler.add_job(reset_status, 'cron', day_of_week='0-6', hour=int(reset_hour), minute=int(reset_minute))
 
-# 一个token 多人打卡 （凌晨打卡）不推荐
-# scheduler.add_job(new_fuck, 'cron', day_of_week='0-6', hour=10, minute=35)
+# 一个token 多人打卡 ===> 不推荐
+# scheduler.add_job(new_fuck, 'cron', day_of_week='0-6', hour=int(tik_hour), minute=int(tik_minute))
 
 # 一人一个token
-scheduler.add_job(fuck_check, 'cron', day_of_week='0-6', hour=10, minute=36)
+scheduler.add_job(fuck_check, 'cron', day_of_week='0-6', hour=int(tik_hour), minute=int(tik_minute))
 
 # 发送报告
-scheduler.add_job(send_status, 'cron', day_of_week='0-6', hour=10, minute=38)
+scheduler.add_job(send_status, 'cron', day_of_week='0-6', hour=int(push_hour), minute=int(push_minute))
 
 print("========== 启动成功 ===========")
 scheduler.start()
